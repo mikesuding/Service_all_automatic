@@ -5,7 +5,7 @@
   <errmsg>OK</errmsg>
   <interval>0</interval>
     <entry type="predatasource">
-        <version>1554760950</version>
+        <version>1554994473</version>
         <name>Services_all_automatic</name>
         <displayedas>Services all automatic</displayedas>
         <description>Monitors all Windows services that are set to &#34;startup type = automatic&#34;. It&#39;s more efficient than default WMI DataSource because it&#39;s batchscript meaning it gets all info in one script instead of separate WMI calls for each service. By Mike Suding.</description>
@@ -19,8 +19,7 @@
         <wildcardlinuxcmdline>type=&#34;powerShell&#34; </wildcardlinuxcmdline>
         <wildcardwinscript>ad_script</wildcardwinscript>
         <wildcardwincmdline>type=&#34;powerShell&#34; </wildcardwincmdline>
-        <wildcardgroovyscript>#get-service
-$HostName = &#39;##SYSTEM.SYSNAME##&#39;
+        <wildcardgroovyscript>$HostName = &#39;##SYSTEM.SYSNAME##&#39;
 $UserName = &#39;##wmi.user##&#39;
 $Password = &#39;##wmi.pass##&#39;
 
@@ -59,8 +58,8 @@ Exit 0</wildcardgroovyscript>
         <agdparams></agdparams>
         <group></group>
         <tags></tags>
-        <technology>You will need to filter out some services that automatically start but are not always running. Do this by adding to the discovery filter below.</technology>
-        <adlist><![CDATA[{"agdmethod":"none","method":"ad_script","agdparams":"","id":0,"filters":[{"attribute":"##wildalias##","operation":"RegexNotMatch","value":"##services_to_ignore##"},{"attribute":"##wildalias##","operation":"RegexNotMatch","value":"gupdate|Software Protection|Remote Registry|Wireless Zero|Downloaded Maps|Windows Biometric|Framework NGEN"}],"params":{"type":"powerShell","groovyscript":"#get-service\r\n$HostName = '##SYSTEM.SYSNAME##'\r\n$UserName = '##wmi.user##'\r\n$Password = '##wmi.pass##'\r\n\r\n$DiscoveryScriptBlock = \r\n{\r\n    $Services = Get-WmiObject win32_service | Where-Object {$_.StartMode -eq \"Auto\"}\r\n    Foreach ($service in $Services)\r\n    {\r\n        Write-Host \"$($service.Name)##$($service.DisplayName)\"\r\n    }\r\n}\r\n\r\nTry\r\n{\r\n    #If creds empty - invoke remote command without creds, if not - create credential object and use it for authorization\r\n    if ($UserName -Match \"wmi.user\" -and $Password -Match \"wmi.pass\")\r\n    {\r\n        Invoke-Command -ComputerName $HostName -ScriptBlock $DiscoveryScriptBlock\r\n    }\r\n    else\r\n    {\r\n        $Credentials = New-Object System.Management.Automation.PSCredential ($UserName, $(ConvertTo-SecureString $Password -AsPlainText -Force))\r\n        Invoke-Command -ComputerName $HostName -ScriptBlock $DiscoveryScriptBlock -Credential $Credentials\r\n    }\r\n}\r\nCatch \r\n{\r\n    #In case of error - create new instance with error description\r\n    Write-Host \"ERROR##$($_.FullyQualifiedErrorId): $($_.Exception.Message)\"\r\n}\r\nExit 0"}}]]></adlist>
+        <technology>You will need to filter out some services that automatically start but are not always running. Do this by adding to the discovery filter below. See http://blog.mikesuding.com for details.</technology>
+        <adlist><![CDATA[{"agdmethod":"none","method":"ad_script","agdparams":"","id":0,"filters":[{"attribute":"##wildalias##","operation":"RegexNotMatch","value":"gupdate|Software Protection|Remote Registry|Wireless Zero|Downloaded Maps|Windows Biometric|Framework NGEN"}],"params":{"type":"powerShell","groovyscript":"$HostName = '##SYSTEM.SYSNAME##'\r\n$UserName = '##wmi.user##'\r\n$Password = '##wmi.pass##'\r\n\r\n$DiscoveryScriptBlock = \r\n{\r\n    $Services = Get-WmiObject win32_service | Where-Object {$_.StartMode -eq \"Auto\"}\r\n    Foreach ($service in $Services)\r\n    {\r\n        Write-Host \"$($service.Name)##$($service.DisplayName)\"\r\n    }\r\n}\r\n\r\nTry\r\n{\r\n    #If creds empty - invoke remote command without creds, if not - create credential object and use it for authorization\r\n    if ($UserName -Match \"wmi.user\" -and $Password -Match \"wmi.pass\")\r\n    {\r\n        Invoke-Command -ComputerName $HostName -ScriptBlock $DiscoveryScriptBlock\r\n    }\r\n    else\r\n    {\r\n        $Credentials = New-Object System.Management.Automation.PSCredential ($UserName, $(ConvertTo-SecureString $Password -AsPlainText -Force))\r\n        Invoke-Command -ComputerName $HostName -ScriptBlock $DiscoveryScriptBlock -Credential $Credentials\r\n    }\r\n}\r\nCatch \r\n{\r\n    #In case of error - create new instance with error description\r\n    Write-Host \"ERROR##$($_.FullyQualifiedErrorId): $($_.Exception.Message)\"\r\n}\r\nExit 0"}}]]></adlist>
         <schemaVersion>2</schemaVersion>
         <dataSourceType>1</dataSourceType>
         <attributes>
@@ -71,8 +70,7 @@ Exit 0</wildcardgroovyscript>
         </attribute>
         <attribute>
             <name>scriptgroovy</name>
-            <value>#Collection Script
-$HostName = &#39;##SYSTEM.SYSNAME##&#39;
+            <value>$HostName = &#39;##SYSTEM.SYSNAME##&#39;
 $UserName = &#39;##wmi.user##&#39;
 $Password = &#39;##wmi.pass##&#39;
 
@@ -137,11 +135,6 @@ Exit 0</value>
         </attribute>
         <attribute>
             <name>__filter_0</name>
-            <value>##wildalias##	RegexNotMatch	##services_to_ignore##</value>
-            <comment>ignore these as listed in device property</comment>
-        </attribute>
-        <attribute>
-            <name>__filter_1</name>
             <value>##wildalias##	RegexNotMatch	gupdate|Software Protection|Remote Registry|Wireless Zero|Downloaded Maps|Windows Biometric|Framework NGEN</value>
             <comment>add your services to skip here</comment>
         </attribute>
